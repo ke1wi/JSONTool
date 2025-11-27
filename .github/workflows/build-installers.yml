@@ -24,7 +24,7 @@ jobs:
       - name: Build JAR
         run: mvn -B clean package
 
-      - name: Package macOS DMG
+      - name: Create macOS DMG
         run: |
           jpackage \
             --input target \
@@ -34,9 +34,7 @@ jobs:
             --type dmg \
             --add-modules javafx.controls,javafx.fxml,javafx.graphics,javafx.base \
             --module-path "$JAVA_HOME/lib" \
-            --dest target/installer-macos \
-            --app-version 1.0 \
-            --vendor ke1wi
+            --dest target/installer-macos
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
@@ -69,17 +67,15 @@ jobs:
 
       - name: Package Windows EXE
         run: |
-          jpackage `
-            --input target `
-            --main-jar json-tool-1.0.jar `
-            --name JSONTool `
-            --main-class com.jsontoll.Main `
-            --type exe `
-            --add-modules javafx.controls,javafx.fxml,javafx.graphics,javafx.base `
-            --module-path "$env:JAVA_HOME\lib" `
-            --dest target\installer-windows `
-            --app-version 1.0 `
-            --vendor ke1wi
+          jpackage ^
+            --input target ^
+            --main-jar json-tool-1.0.jar ^
+            --name JSONTool ^
+            --main-class com.jsontoll.Main ^
+            --type exe ^
+            --add-modules javafx.controls,javafx.fxml,javafx.graphics,javafx.base ^
+            --module-path "%JAVA_HOME%\lib" ^
+            --dest target\installer-win
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
