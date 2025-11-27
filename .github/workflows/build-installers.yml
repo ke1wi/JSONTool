@@ -53,13 +53,6 @@ jobs:
           distribution: zulu
           java-version: 21
 
-      - name: Set JAVA_HOME
-        shell: powershell
-        run: |
-          $path = "C:\Program Files\BellSoft\LibericaJDK-21-Full"
-          echo "JAVA_HOME=$path" | Out-File -FilePath $env:GITHUB_ENV -Append
-          echo "$path\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
-
       - name: Build JAR
         run: mvn -B clean package
 
