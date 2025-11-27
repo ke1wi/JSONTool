@@ -14,18 +14,17 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Download Liberica Full JDK 21
+      - name: Download Liberica Full JDK 21 ZIP
         run: |
-          curl -L -o liberica.msi "https://download.bell-sw.com/java/21.0.3/bellsoft-jdk21.0.3+13-windows-amd64-full.msi"
+          curl -L -o liberica.zip "https://download.bell-sw.com/java/21.0.3/bellsoft-jdk21.0.3+13-windows-amd64-full.zip"
 
-      - name: Install Liberica JDK (with JavaFX)
-        run: |
-          msiexec /i liberica.msi /qn /norestart
+      - name: Extract JDK
+        run: Expand-Archive liberica.zip -DestinationPath $env:USERPROFILE\liberica
 
       - name: Set JAVA_HOME
         run: |
-          echo "JAVA_HOME=C:\\Program Files\\BellSoft\\LibericaJDK-21" >> $env:GITHUB_ENV
-          echo "PATH=C:\\Program Files\\BellSoft\\LibericaJDK-21\\bin;$env:PATH" >> $env:GITHUB_ENV
+          echo "JAVA_HOME=$env:USERPROFILE\liberica\jdk-21.0.3-full" >> $env:GITHUB_ENV
+          echo "$env:USERPROFILE\liberica\jdk-21.0.3-full\bin" >> $env:GITHUB_PATH
 
       - name: Verify Java
         run: java -version
