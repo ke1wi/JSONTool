@@ -18,7 +18,7 @@ jobs:
           distribution: "zulu"
           java-version: "21"
       - name: Build DMG
-        run: mvn clean package "-Djpackage.type=exe"
+        run: mvn clean package "-Djpackage.type=dmg"
       - uses: actions/upload-artifact@v4
         with:
           name: jsontool-dmg
@@ -33,7 +33,7 @@ jobs:
           distribution: "zulu"
           java-version: "21"
       - name: Build EXE
-        run: mvn clean package -Djpackage.type=exe
+        run: mvn clean package "-Djpackage.type=exe"
       - uses: actions/upload-artifact@v4
         with:
           name: jsontool-exe
@@ -48,7 +48,7 @@ jobs:
           distribution: "zulu"
           java-version: "21"
       - name: Build AppImage
-        run: mvn clean package -Djpackage.type=app-image
+        run: mvn clean package "-Djpackage.type=deb"
       - uses: actions/upload-artifact@v4
         with:
           name: jsontool-appimage
