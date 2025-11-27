@@ -1,95 +1,71 @@
-name: Build Installers (JSONTool)
+name: Build JSONTool
 
 on:
   push:
-    branches: ["main"]
+    tags:
+      - "v*"
   workflow_dispatch:
 
 jobs:
-  build-windows:
-    name: Build Windows EXE
-    runs-on: windows-latest
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Download Liberica JDK MSI
-        shell: powershell
-        run: |
-          Invoke-WebRequest "https://download.bell-sw.com/java/21.0.9+15/bellsoft-jdk21.0.9+15-windows-amd64.msi" -OutFile liberica.msi -UseBasicParsing
-
-      - name: Install Liberica JDK silently
-        shell: powershell
-        run: |
-          Start-Process msiexec.exe -ArgumentList '/i', 'liberica.msi', '/qn', '/norestart' -Wait -NoNewWindow
-
-      - name: Set JAVA_HOME
-        shell: powershell
-        run: |
-          $javaHome = "C:\Program Files\BellSoft\LibericaJDK-21"
-          echo "JAVA_HOME=$javaHome" >> $env:GITHUB_ENV
-          echo "$javaHome\bin" >> $env:GITHUB_PATH
-
-      - name: Verify Java
-        run: java -version
-
-      - name: Build FAT JAR
-        run: mvn -B clean package
-
-      - name: Build Windows EXE using jpackage
-        run: |
-          jpackage `
-            --name JSONTool `
-            --input target `
-            --main-jar json-tool-1.0.jar `
-            --main-class com.jsontoll.Main `
-            --type exe `
-            --app-version 1.0 `
-            --vendor ke1wi `
-            --add-modules javafx.controls,javafx.fxml,javafx.graphics,javafx.base `
-            --dest installer
-
-      - name: Upload Windows EXE artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: JSONTool-windows-exe
-          path: installer/*.exe
-
-  build-macos:
-    name: Build macOS DMG
+  build-mac:
     runs-on: macos-latest
-
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install Liberica Full JDK (JavaFX included)
+      - name: Set JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: "zulu"
+          java-version: "21"
+
+      - name: Build DMG
         run: |
-          brew tap bell-sw/liberica
-          brew update
-          brew install --cask liberica-jdk21-full
+          mvn -B clean package -Djpackage.type=dmg
 
-      - name: Set JAVA_HOME
-        run: echo "JAVA_HOME=/Library/Java/JavaVirtualMachines/liberica-jdk-21-full.jdk/Contents/Home" >> $GITHUB_ENV
-
-      - name: Build with Maven
-        run: mvn -B clean package
-
-      - name: Build DMG with jpackage
-        run: |
-          jpackage \
-            --name JSONTool \
-            --input target \
-            --main-jar json-tool-1.0.jar \
-            --main-class com.jsontoll.Main \
-            --type dmg \
-            --app-version 1.0 \
-            --vendor ke1wi \
-            --dest installer
-
-      - name: Upload macOS DMG
+      - name: Upload DMG
         uses: actions/upload-artifact@v4
         with:
-          name: JSONTool-macos-dmg
-          path: installer/*.dmg
+          name: jsontool-dmg
+          path: target/installer/*.dmg
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: "zulu"
+          java-version: "21"
+
+      - name: Build EXE
+        run: |
+          mvn -B clean package -Djpackage.type=exe
+
+      - name: Upload EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: jsontool-exe
+          path: target/installer/*.exe
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: "zulu"
+          java-version: "21"
+
+      - name: Build portable app image
+        run: |
+          mvn -B clean package -Djpackage.type=app-image
+
+      - name: Upload app-image
+        uses: actions/upload-artifact@v4
+        with:
+          name: jsontool-appimage
+          path: target/installer/**

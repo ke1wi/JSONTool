@@ -94,87 +94,44 @@
 
             <!-- JPACKAGE (auto-detect type based on OS) -->
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <id>installer</id>
-                        <phase>package</phase>
-                        <goals><goal>exec</goal></goals>
-                        <configuration>
-                            <executable>jpackage</executable>
-                            <arguments>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>exec-maven-plugin</artifactId>
+    <version>3.1.0</version>
+    <executions>
+        <execution>
+            <id>package-app</id>
+            <phase>package</phase>
+            <goals>
+                <goal>exec</goal>
+            </goals>
+            <configuration>
+                <executable>jpackage</executable>
+                <arguments>
+                    <argument>--input</argument>
+                    <argument>${project.build.directory}</argument>
 
-                                <!-- FAT JAR -->
-                                <argument>--input</argument>
-                                <argument>${project.build.directory}</argument>
+                    <argument>--main-jar</argument>
+                    <argument>${project.build.finalName}.jar</argument>
 
-                                <argument>--main-jar</argument>
-                                <argument>${project.build.finalName}.jar</argument>
+                    <argument>--name</argument>
+                    <argument>JSONTool</argument>
 
-                                <argument>--main-class</argument>
-                                <argument>${main.class}</argument>
+                    <argument>--main-class</argument>
+                    <argument>com.jsontoll.Main</argument>
 
-                                <argument>--name</argument>
-                                <argument>JSONTool</argument>
+                    <!-- type буде вставлятися у GitHub Actions -->
+                    <argument>--type</argument>
+                    <argument>${jpackage.type}</argument>
 
-                                <argument>--dest</argument>
-                                <argument>${project.build.directory}/installer</argument>
-
-                                <!-- Auto type -->
-                                <argument>--type</argument>
-                                <argument>${jpackage.type}</argument>
-
-                                <!-- version -->
-                                <argument>--app-version</argument>
-                                <argument>${project.version}</argument>
-
-                                <argument>--vendor</argument>
-                                <argument>ke1wi</argument>
-
-                            </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+                    <argument>--dest</argument>
+                    <argument>${project.build.directory}/installer</argument>
+                </arguments>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
 
         </plugins>
     </build>
-
-    <!-- AUTO SELECT jpackage type -->
-    <profiles>
-
-        <profile>
-            <id>macos</id>
-            <activation>
-                <os><family>mac</family></os>
-            </activation>
-            <properties>
-                <jpackage.type>dmg</jpackage.type>
-            </properties>
-        </profile>
-
-        <profile>
-            <id>windows</id>
-            <activation>
-                <os><family>windows</family></os>
-            </activation>
-            <properties>
-                <jpackage.type>exe</jpackage.type>
-            </properties>
-        </profile>
-
-        <profile>
-            <id>linux</id>
-            <activation>
-                <os><family>unix</family></os>
-            </activation>
-            <properties>
-                <jpackage.type>deb</jpackage.type>
-            </properties>
-        </profile>
-
-    </profiles>
 
 </project>
