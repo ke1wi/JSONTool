@@ -14,17 +14,26 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install Liberica Full JDK (with JavaFX)
+      - name: Download Liberica Full JDK 21
         run: |
-          choco install liberica21full -y
+          curl -L -o liberica.msi "https://download.bell-sw.com/java/21.0.3/bellsoft-jdk21.0.3+13-windows-amd64-full.msi"
+
+      - name: Install Liberica JDK (with JavaFX)
+        run: |
+          msiexec /i liberica.msi /qn /norestart
 
       - name: Set JAVA_HOME
-        run: echo "JAVA_HOME=C:\Program Files\BellSoft\LibericaJDK-21" >> $env:GITHUB_ENV
+        run: |
+          echo "JAVA_HOME=C:\\Program Files\\BellSoft\\LibericaJDK-21" >> $env:GITHUB_ENV
+          echo "PATH=C:\\Program Files\\BellSoft\\LibericaJDK-21\\bin;$env:PATH" >> $env:GITHUB_ENV
 
-      - name: Build with Maven
+      - name: Verify Java
+        run: java -version
+
+      - name: Build FAT JAR
         run: mvn -B clean package
 
-      - name: Build EXE with jpackage
+      - name: Build Windows EXE using jpackage
         run: |
           jpackage `
             --name JSONTool `
@@ -34,9 +43,10 @@ jobs:
             --type exe `
             --app-version 1.0 `
             --vendor ke1wi `
+            --add-modules javafx.controls,javafx.fxml,javafx.graphics,javafx.base `
             --dest installer
 
-      - name: Upload Windows EXE
+      - name: Upload Windows EXE artifact
         uses: actions/upload-artifact@v4
         with:
           name: JSONTool-windows-exe
