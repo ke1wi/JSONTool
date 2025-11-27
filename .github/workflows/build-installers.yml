@@ -2,54 +2,87 @@ name: Build Installers
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
 
 jobs:
-  build-mac:
+  build-macos:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+
+      - name: Install Liberica JDK 21 Full (JavaFX included)
+        run: |
+          brew tap bell-sw/liberica
+          brew install --cask liberica-jdk21-full
+
+      - name: Set JAVA_HOME
+        run: |
+          echo "JAVA_HOME=/Library/Java/JavaVirtualMachines/liberica-jdk-21-full.jdk/Contents/Home" >> $GITHUB_ENV
+          echo "$JAVA_HOME/bin" >> $GITHUB_PATH
+
+      - name: Build JAR
+        run: mvn -B clean package
+
+      - name: Package macOS DMG
+        run: |
+          jpackage \
+            --input target \
+            --main-jar json-tool-1.0.jar \
+            --name JSONTool \
+            --main-class com.jsontoll.Main \
+            --type dmg \
+            --add-modules javafx.controls,javafx.fxml,javafx.graphics,javafx.base \
+            --module-path "$JAVA_HOME/lib" \
+            --dest target/installer-macos \
+            --app-version 1.0 \
+            --vendor ke1wi
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
         with:
-          distribution: "zulu"
-          java-version: "21"
-      - name: Build DMG
-        run: mvn clean package "-Djpackage.type=dmg"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: jsontool-dmg
-          path: target/installer/*.dmg
+          name: macOS-dmg
+          path: target/installer-macos/*.dmg
 
   build-windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: "zulu"
-          java-version: "21"
-      - name: Build EXE
-        run: mvn clean package "-Djpackage.type=exe"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: jsontool-exe
-          path: target/installer/*.exe
 
-  build-linux:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - name: Download Liberica JDK 21 Full
+        run: |
+          curl -L -o liberica.msi https://download.bell-sw.com/java/21.0.9+15/bellsoft-jdk21.0.9+15-windows-amd64.msi
+
+      - name: Install LibericaJDK
+        run: |
+          Start-Process msiexec.exe -ArgumentList '/i','liberica.msi','/qn','/norestart' -Wait
+
+      - name: Set JAVA_HOME
+        shell: powershell
+        run: |
+          $path = "C:\Program Files\BellSoft\LibericaJDK-21-Full"
+          echo "JAVA_HOME=$path" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "$path\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+
+      - name: Build JAR
+        run: mvn -B clean package
+
+      - name: Package Windows EXE
+        run: |
+          jpackage `
+            --input target `
+            --main-jar json-tool-1.0.jar `
+            --name JSONTool `
+            --main-class com.jsontoll.Main `
+            --type exe `
+            --add-modules javafx.controls,javafx.fxml,javafx.graphics,javafx.base `
+            --module-path "$env:JAVA_HOME\lib" `
+            --dest target\installer-windows `
+            --app-version 1.0 `
+            --vendor ke1wi
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
         with:
-          distribution: "zulu"
-          java-version: "21"
-      - name: Build AppImage
-        run: mvn clean package "-Djpackage.type=deb"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: jsontool-appimage
-          path: target/installer/**
+          name: windows-exe
+          path: target/installer-windows/*.exe
