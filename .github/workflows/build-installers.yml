@@ -51,7 +51,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Liberica Full JDK (JavaFX included)
-        run: brew install --cask liberica-jdk21-full
+        run: |
+          brew tap bell-sw/liberica
+          brew update
+          brew install --cask liberica-jdk21-full
 
       - name: Set JAVA_HOME
         run: echo "JAVA_HOME=/Library/Java/JavaVirtualMachines/liberica-jdk-21-full.jdk/Contents/Home" >> $GITHUB_ENV
