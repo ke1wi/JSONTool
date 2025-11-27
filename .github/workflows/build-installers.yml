@@ -47,13 +47,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download Liberica JDK 21 Full
-        run: |
-          curl -L -o liberica.msi https://download.bell-sw.com/java/21.0.9+15/bellsoft-jdk21.0.9+15-windows-amd64.msi
-
-      - name: Install LibericaJDK
-        run: |
-          Start-Process msiexec.exe -ArgumentList '/i','liberica.msi','/qn','/norestart' -Wait
+      - name: Set up BellSoft Liberica JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: liberica
+          java-version: 21
 
       - name: Set JAVA_HOME
         shell: powershell
