@@ -18,8 +18,11 @@ jobs:
         run: |
           curl -L -o liberica.zip "https://download.bell-sw.com/java/21.0.3/bellsoft-jdk21.0.3+13-windows-amd64-full.zip"
 
-      - name: Extract JDK
-        run: Expand-Archive liberica.zip -DestinationPath $env:USERPROFILE\liberica
+      - name: Extract Liberica JDK ZIP
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "$env:USERPROFILE/liberica" | Out-Null
+          Expand-Archive -Path "liberica.zip" -DestinationPath "$env:USERPROFILE/liberica" -Force
 
       - name: Set JAVA_HOME
         run: |
