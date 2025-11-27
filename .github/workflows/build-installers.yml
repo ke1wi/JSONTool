@@ -1,0 +1,78 @@
+name: Build Installers (JSONTool)
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    name: Build Windows EXE
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install Liberica Full JDK (with JavaFX)
+        run: |
+          choco install liberica21full -y
+
+      - name: Set JAVA_HOME
+        run: echo "JAVA_HOME=C:\Program Files\BellSoft\LibericaJDK-21" >> $env:GITHUB_ENV
+
+      - name: Build with Maven
+        run: mvn -B clean package
+
+      - name: Build EXE with jpackage
+        run: |
+          jpackage `
+            --name JSONTool `
+            --input target `
+            --main-jar json-tool-1.0.jar `
+            --main-class com.jsontoll.Main `
+            --type exe `
+            --app-version 1.0 `
+            --vendor ke1wi `
+            --dest installer
+
+      - name: Upload Windows EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: JSONTool-windows-exe
+          path: installer/*.exe
+
+  build-macos:
+    name: Build macOS DMG
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install Liberica Full JDK (JavaFX included)
+        run: brew install --cask liberica-jdk21-full
+
+      - name: Set JAVA_HOME
+        run: echo "JAVA_HOME=/Library/Java/JavaVirtualMachines/liberica-jdk-21-full.jdk/Contents/Home" >> $GITHUB_ENV
+
+      - name: Build with Maven
+        run: mvn -B clean package
+
+      - name: Build DMG with jpackage
+        run: |
+          jpackage \
+            --name JSONTool \
+            --input target \
+            --main-jar json-tool-1.0.jar \
+            --main-class com.jsontoll.Main \
+            --type dmg \
+            --app-version 1.0 \
+            --vendor ke1wi \
+            --dest installer
+
+      - name: Upload macOS DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: JSONTool-macos-dmg
+          path: installer/*.dmg

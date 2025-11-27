@@ -1,0 +1,6 @@
+.code-area {
+    -fx-font-family: "JetBrains Mono", Consolas, monospace;
+    -fx-font-size: 14px;
+}
+.bracket { -fx-fill: orange; }
+.string  { -fx-fill: #98c379; }

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.fxmisc.richtext.CodeArea?>
+
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.jsontoll.ui.MainController" spacing="5">
+
+    <MenuBar>
+        <Menu text="Файл">
+            <MenuItem text="Відкрити схему..." onAction="#openSchema"/>
+            <SeparatorMenuItem/>
+            <MenuItem text="Вихід" onAction="#closeApplication"/>
+        </Menu>
+        <Menu text="Валідація">
+            <MenuItem text="Перевірити JSON-документ..." onAction="#validateInstance"/>
+        </Menu>
+    </MenuBar>
+
+    <SplitPane dividerPositions="0.35, 0.65">
+        <!-- ТАБЛИЦЯ МЕТАДАНИХ — ТЕПЕР З КОЛОНКАМИ! -->
+        <TableView fx:id="metadataTable" prefWidth="500">
+            <columns>
+                <TableColumn text="Назва" prefWidth="180">
+                    <cellValueFactory><PropertyValueFactory property="name"/></cellValueFactory>
+                </TableColumn>
+                <TableColumn text="Тип" prefWidth="100">
+                    <cellValueFactory><PropertyValueFactory property="type"/></cellValueFactory>
+                </TableColumn>
+                <TableColumn text="Опис" prefWidth="400">
+                    <cellValueFactory><PropertyValueFactory property="description"/></cellValueFactory>
+                </TableColumn>
+                <TableColumn text="Формат" prefWidth="120">
+                    <cellValueFactory><PropertyValueFactory property="format"/></cellValueFactory>
+                </TableColumn>
+            </columns>
+            <placeholder>
+                <Label text="Немає властивостей (properties не знайдено або схема порожня)" />
+            </placeholder>
+        </TableView>
+
+        <!-- РЕДАКТОР З ПІДСВІТКОЮ -->
+        <CodeArea fx:id="codeArea" wrapText="true" styleClass="code-area"/>
+    </SplitPane>
+
+    <Label fx:id="statusLabel" text="Готово"
+           style="-fx-background-color: #2d2d2d; -fx-text-fill: #a0a0a0; -fx-padding: 8; -fx-font-size: 13;"/>
+</VBox>
