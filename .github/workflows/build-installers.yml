@@ -1,28 +1,25 @@
-name: Build JSONTool
+name: Build Installers
 
 on:
   push:
-    branches: ["main"]
-  workflow_dispatch:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build-mac:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set JDK
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: "zulu"
           java-version: "21"
-
       - name: Build DMG
-        run: |
-          mvn -B clean package -Djpackage.type=dmg
-
-      - name: Upload DMG
-        uses: actions/upload-artifact@v4
+        run: mvn clean package -Djpackage.type=dmg
+      - uses: actions/upload-artifact@v4
         with:
           name: jsontool-dmg
           path: target/installer/*.dmg
@@ -31,19 +28,13 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set JDK
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: "zulu"
           java-version: "21"
-
       - name: Build EXE
-        run: |
-          mvn -B clean package -Djpackage.type=exe
-
-      - name: Upload EXE
-        uses: actions/upload-artifact@v4
+        run: mvn clean package -Djpackage.type=exe
+      - uses: actions/upload-artifact@v4
         with:
           name: jsontool-exe
           path: target/installer/*.exe
@@ -52,19 +43,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set JDK
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: "zulu"
           java-version: "21"
-
-      - name: Build portable app image
-        run: |
-          mvn -B clean package -Djpackage.type=app-image
-
-      - name: Upload app-image
-        uses: actions/upload-artifact@v4
+      - name: Build AppImage
+        run: mvn clean package -Djpackage.type=app-image
+      - uses: actions/upload-artifact@v4
         with:
           name: jsontool-appimage
           path: target/installer/**
